@@ -3,40 +3,49 @@ import re
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
+# Récupération du token du bot depuis les variables d'environnement
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Bienvenue 😊\n"
-        "Envoyez-moi un numéro comme :\n"
-        "📱 0550121212 ou 550121212\n"
-        "et je le convertirai en ➡️ +213550121212"
+        "👋 Bienvenue !\n\n"
+        "Envoyez-moi un numéro au format :\n"
+        "📱 0550121212\n"
+        "📱 550121212\n"
+        "📱 650121212\n"
+        "📱 770121212\n\n"
+        "Et je vous renverrai le format international avec un lien WhatsApp."
     )
 
 async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    num = update.message.text.strip()
-    num = re.sub(r"[^\d+]", "", num)  # garde seulement chiffres et +
+    # Nettoyage : garde uniquement chiffres et +
+    num = re.sub(r"[^\d+]", "", update.message.text.strip())
 
-    # ✅ Si le numéro commence par "0" → on enlève et ajoute +213
+    # Conversion en format international
     if num.startswith("0") and len(num) >= 9:
         international_num = "+213" + num[1:]
-        await update.message.reply_text(international_num)
-
-    # ✅ Si le numéro commence directement par 5xx...
     elif num.startswith(("5", "6", "7")) and len(num) >= 8:
         international_num = "+213" + num
-        await update.message.reply_text(international_num)
-
-    # ✅ Si déjà au format international
     elif num.startswith("+213"):
         await update.message.reply_text("✅ Ce numéro est déjà au format international.")
-
+        return
     else:
-        await update.message.reply_text("⚠️ Numéro invalide.\nExemple : 0550505050 ou 550505050")
+        await update.message.reply_text("⚠️ Numéro invalide.\nExemple : 0550121212 ou 550121212")
+        return
+
+    # Lien WhatsApp
+    whatsapp_link = f"https://wa.me/{international_num.replace('+', '')}"
+
+    # Réponse
+    await update.message.reply_text(f"{international_num}\n📩 WhatsApp : {whatsapp_link}")
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
+
+    # Commande /start
     app.add_handler(CommandHandler("start", start))
+
+    # Messages texte → conversion
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, convert_number))
 
     print("🤖 Bot démarré...")
