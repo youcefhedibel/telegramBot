@@ -13,7 +13,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📱 550121212\n"
         "📱 650121212\n"
         "📱 770121212\n\n"
-        "Et je vous renverrai le format international avec un lien WhatsApp."
+        "Je vous renverrai le format international avec des liens pour WhatsApp et Telegram."
     )
 
 async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -32,16 +32,20 @@ async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ Numéro invalide.\nExemple : 0550121212 ou 550121212")
         return
 
-    # Lien WhatsApp
+    # Liens
     whatsapp_link = f"https://wa.me/{international_num.replace('+', '')}"
+    telegram_link = f"https://t.me/{international_num.replace('+', '')}"
 
-    # Création du bouton
+    # Boutons
     keyboard = [
-        [InlineKeyboardButton("📩 Ouvrir dans WhatsApp", url=whatsapp_link)]
+        [
+            InlineKeyboardButton("📩 Ouvrir dans WhatsApp", url=whatsapp_link),
+            InlineKeyboardButton("💬 Ouvrir dans Telegram", url=telegram_link)
+        ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Réponse avec bouton
+    # Réponse avec boutons
     await update.message.reply_text(
         f"✅ Numéro international : {international_num}",
         reply_markup=reply_markup
