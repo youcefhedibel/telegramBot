@@ -1,9 +1,8 @@
 import os
 import re
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Récupération du token du bot depuis les variables d'environnement
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -18,7 +17,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Nettoyage : garde uniquement chiffres et +
+    # Nettoyage : garder uniquement chiffres et +
     num = re.sub(r"[^\d+]", "", update.message.text.strip())
 
     # Conversion en format international
@@ -36,18 +35,22 @@ async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Lien WhatsApp
     whatsapp_link = f"https://wa.me/{international_num.replace('+', '')}"
 
-    # Réponse
-    await update.message.reply_text(f"{international_num}\n📩 WhatsApp : {whatsapp_link}")
+    # Création du bouton
+    keyboard = [
+        [InlineKeyboardButton("📩 Ouvrir dans WhatsApp", url=whatsapp_link)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Réponse avec bouton
+    await update.message.reply_text(
+        f"✅ Numéro international : {international_num}",
+        reply_markup=reply_markup
+    )
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
-
-    # Commande /start
     app.add_handler(CommandHandler("start", start))
-
-    # Messages texte → conversion
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, convert_number))
-
     print("🤖 Bot démarré...")
     app.run_polling()
 
