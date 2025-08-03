@@ -23,7 +23,7 @@ async def convert_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(international_num)
 
     # ✅ Si le numéro commence directement par 5xx...
-elif num.startswith(("5", "6", "7")) and len(num) >= 8:
+    elif num.startswith(("5", "6", "7")) and len(num) >= 8:
         international_num = "+213" + num
         await update.message.reply_text(international_num)
 
